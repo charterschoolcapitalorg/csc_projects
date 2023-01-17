@@ -1,0 +1,22 @@
+.THIS {
+    font-size: 12px;
+}
+
+.THIS.spinner {
+	height: 300px;
+}
+
+.THIS .btnCustomStyle{
+    padding-left: 0.5rem!important;
+    padding-right: 0.5rem!important;
+    padding-top: 3;
+}
+
+.THIS .btnRefreshCustomStyle{
+    padding-left: 0.5rem!important;
+    padding-right: 0.5rem!important;
+    background-color: #e8e8e8;
+}
+
+.THIS .tableFixHead { overflow: auto; height: 600px; } 
+.THIS .tableFixHead table { border-collapse: inherit; width: 100%; }

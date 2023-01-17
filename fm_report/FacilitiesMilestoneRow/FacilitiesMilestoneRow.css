@@ -1,0 +1,14 @@
+.THIS .slds-icon_container {
+    width: 20px;
+    height: 20px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+.THIS .slds-icon_container .slds-icon {
+	width: 14px;
+    height: 14px;
+    margin-top: -3px;
+    margin-left: -3px;
+}

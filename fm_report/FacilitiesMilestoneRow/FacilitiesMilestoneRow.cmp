@@ -1,0 +1,106 @@
+<aura:component >
+    <aura:attribute name="opportunity" type="object" />
+    <aura:attribute name="text" type="String" />
+        <tbody>
+            <tr class="slds-hint-parent">
+                <td data-label="Num" class="slds-text-align_left" style="width:20px">
+                    <lightning:formattedNumber value="{!v.text + 1}"/>
+                </td>
+                <td data-label="Close Date" class="slds-text-align_left" style="width:65px">
+                    <ui:outputDate aura:id="expdate" class="field" value="{!v.opportunity.opp.CloseDate}" format="MM/DD/YY"/>
+                </td>
+                <td data-label="Diligence End" class="slds-text-align_left slds-truncate" style="width:60px;">
+                    <ui:outputDate aura:id="ddend" class="field" value="{!v.opportunity.opp.Due_Diligence_End_Date__c}" format="MM/DD/YY"/>
+                    <!-- <p class="slds-truncate" style="width:60px;"><lightning:formattedText value="{!v.opportunity.opp.Due_Diligence_End_Date__c}"/></p> -->
+                </td>
+                <td data-label="Created" class="slds-text-align_left" style="width:70px">
+                    <ui:outputDate aura:id="expdate" class="field" value="{!v.opportunity.createdDate}" format="MM/DD/YY"/>
+                </td>
+                <td data-label="BD Until Close" class="slds-text-align_right" style="width:50px; text-align:center">
+                    <lightning:formattedNumber value="{!v.opportunity.businessDaysToClose}" maximumFractionDigits="0" class="slds-truncate"/>
+                </td>
+                <td data-label="Opp Name" class="slds-text-align_left slds-truncate" style="max-width:180px;">
+                    <lightning:formattedUrl target="_blank" value="{!'/' + v.opportunity.opp.Id}" label="{!v.opportunity.opp.Name}"/>
+                </td>
+                <td data-label="Opp Channel" class="slds-text-align_left" style="width:90px; text-align:center">
+                    <lightning:formattedText value="{!v.opportunity.opp.Facilities_Channel__c}"/>
+                </td>
+                <td data-label="Pipeline Stage" class="slds-text-align_left" style="width:20px; font-size: 10px;">
+                    <lightning:formattedText value="{!v.opportunity.opp.Pipeline_Stage__c}"/>
+                </td>
+                <td data-label="State" class="slds-text-align_left" style="width:50px; text-align:center">
+                    <lightning:formattedText value="{!v.opportunity.opp.STATE__c}"/>
+                </td>
+                <td data-label="Purchase Price" class="slds-text-align_right" style="width:90px; text-align:center">
+                    <lightning:formattedNumber value="{!v.opportunity.opp.Estimated_Project_Cost__c}" maximumFractionDigits="0" class="slds-truncate"/>
+                </td>
+                <td data-label="Cap Rape" class="slds-text-align_left" style="width:70px">
+                    <lightning:formattedNumber value="{!v.opportunity.opp.Lease_Cap_Rate__c}"/>
+                </td>
+
+                <!-- Deal Approved-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.dealApproved}" helpText=""/>
+                </td>
+
+                <!-- Pre FC-->
+                <td class="slds-text-align_left" style="text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.preFC}" helpText="Pre FC"/>
+                </td>
+
+                <!-- LOI Sent-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.loiSent}" helpText="LOI Sent"/>
+                </td>
+
+                <!-- LOI Signed-->
+                <td class="slds-text-align_left" style="text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.loiSigned}" helpText="LOI Signed"/>
+                </td>
+
+                <!-- MOU Sent-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.mouSent}" helpText="MOU Sent"/>
+                </td>
+                  
+                <!-- MOU Signed-->
+                <td class="slds-text-align_left" style="text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.mouSigned}" helpText="MOU Signed"/>
+                </td>
+
+                <!-- PSA Signed-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.psaSigned}" helpText="PSA Signed"/>
+                </td>
+
+                <!-- Lease Signed-->
+                <td class="slds-text-align_left" style="text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.leaseSigned}" helpText="Lease Signed"/>
+                </td>
+
+                <!-- Final FC-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.finalFC}" helpText="Final FC"/>
+                </td>
+
+                <!-- Diligence Waived-->
+                <td class="slds-text-align_left" style="text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.diligenceWaived}" helpText="Diligence waived"/>
+                </td>
+                
+                <!-- Funded-->
+                <td class="slds-text-align_left" style="background-color:#ededed; text-align:center">
+                    <c:FacilitiesMilestoneCell item="{!v.opportunity.funded}" helpText="Funded"/>
+                </td>
+
+
+                <td data-label="Opportunity Owner" class="slds-text-align_left" style="width:80px">
+                    <lightning:formattedText value="{!v.opportunity.opp.Owner.LastName}"/>
+                </td>
+                <td data-label="Deal Specialist" class="slds-text-align_left" style="width:70px">
+                    <lightning:formattedText value="{!v.opportunity.opp.Deal_Specialist__r.LastName}"/>
+                </td>
+
+            </tr>
+        </tbody>
+</aura:component>
