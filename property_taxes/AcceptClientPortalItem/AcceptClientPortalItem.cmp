@@ -1,0 +1,455 @@
+<aura:component implements="force:hasRecordId,flexipage:availableForRecordHome,force:lightningQuickActionWithoutHeader" controller="AcceptClientPortalItemCtrl">
+
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+  <aura:attribute name="theme" type="String" />
+  <aura:attribute name="intakeItem" type="Intake_Item__c" />
+  <aura:attribute name="numPCLItems" type="Integer" />
+  <aura:attribute name="numACLCharterItems" type="Integer" />
+  <aura:attribute name="numACLSChoolItems" type="Integer" />
+  <aura:attribute name="recordId" type="Id" />
+  <aura:attribute name="aclSchoolItems" type="CSC_Action_Item__c[]" />
+  <aura:attribute name="aclCharterItems" type="CSC_Action_Item__c[]" />
+  <aura:attribute name="pclItems" type="CSC_Action_Item__c[]" />
+  <aura:attribute name="CharterAcctRecordType" type="Id" />
+  <aura:attribute name="SchoolAcctRecordType" type="Id" />
+  <aura:attribute name="CSCActionItemSalesRecordType" type="Id" />
+  <aura:attribute name="leaseComplianceItems" type="Lease_Compliance__c[]" />
+  <aura:attribute name="propertyTaxItems" type="Property_Tax__c[]" />
+  <aura:attribute name="numLeaseComplianceItems" type="Integer" />
+  <aura:attribute name="numPropertyTaxItems" type="Integer" />
+  <lightning:overlayLibrary aura:id="overlayLib" />
+  <lightning:navigation aura:id="navService" />
+
+  <ltng:require styles="{!$Resource.facilitiesui}" />
+
+  <br />
+
+  <aura:if isTrue="{!v.intakeItem.Status__c == 'Accepted'}">
+    <b>This item is already Accepted</b>
+    <br />
+    <lightning:button label="Close" onclick="{!c.close}" />
+
+    <aura:set attribute="else">
+        <aura:if isTrue="{!(v.numACLSChoolItems == 0&amp;&amp;v.numACLCharterItems == 0&amp;&amp;v.numPCLItems == 0&amp;&amp;v.numLeaseComplianceItems == 0&amp;&amp;v.numPropertyTaxItems == 0)}">
+            <b>There are no Mapped CSC Action List Items or Lease Compliances or Property Taxes.</b>
+            <br />
+
+            <!--buttons if we DON'T have items-->
+            <lightning:button label="Save" onclick="{!c.saveNoItems}" />
+            <lightning:button label="Close" onclick="{!c.close}" />
+            <!--buttons if we DON'T have items-->
+
+            <aura:set attribute="else">
+                <span style="font-size: 20px; color: #00558c">
+                    <b>Mapping For: {!v.intakeItem.Action_Item_Mapping__c}</b><br />
+                </span>
+                <div style="height: 50px">
+                
+                    <!--Account-->
+                    <aura:if
+                    isTrue="{!and(v.intakeItem.Update_AL__c, v.numACLCharterItems>0)}"
+                    >
+                    <b>Account</b>
+                    <br />
+
+                    <lightning:layout multipleRows="false" class="mySubrowHeader">
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-one header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Account Name</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Effective Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Next Action Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >CP Item Due Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Expiration Date</span
+                        ></lightning:layoutItem
+                        >
+                        <aura:if isTrue="{!v.intakeItem.Copy_Files_to_AL_PCL__c}">
+                        <lightning:layoutItem class="mySubrowHeader header-column-map"
+                            ><span style="vertical-align: middle"
+                            >Map Files</span
+                            ></lightning:layoutItem
+                        >
+                        </aura:if>
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-status"
+                        >Status</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="padding-left: 12px"
+                            >Include Client Comments</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-comments"
+                        ><span style="vertical-align: middle; padding-left: 12px"
+                            >CSC Team Comment</span
+                        ></lightning:layoutItem
+                        >
+                        <aura:if isTrue="{!v.intakeItem.Is_Financial__c}">
+                        <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader header-column-noleft"
+                            ><span style="vertical-align: middle"
+                            >Create Financial Record</span
+                            ></lightning:layoutItem
+                        >
+                        </aura:if>
+                    </lightning:layout>
+
+                    <aura:iteration
+                        items="{!v.aclCharterItems}"
+                        var="ai"
+                        indexVar="indx"
+                    >
+                        <aura:if
+                        isTrue="{!and(ai.CSC_Action_List__r.Account__r.RecordTypeId == v.CharterAcctRecordType, ai.RecordTypeId != v.CSCActionItemSalesRecordType)}"
+                        >
+                        <c:ActionClientPortalItemRow
+                            aura:id="charterchild"
+                            IsPCL="False"
+                            IsCharterAccount="{!ai.CSC_Action_List__r.Account__r.RecordTypeId == v.CharterAcctRecordType}"
+                            ai="{!ai}"
+                            cpi="{!v.intakeItem}"
+                        />
+                        </aura:if>
+                    </aura:iteration>
+
+                    <br />
+                    </aura:if>
+
+                    <!--Account - Action Items-->
+                    <aura:if
+                    isTrue="{!and(v.intakeItem.Update_AL__c, v.numACLSChoolItems>0)}"
+                    >
+                    <b>Account - Action Items</b>
+
+                    <lightning:layout multipleRows="false" class="mySubrowHeader">
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-one header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >School Name</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Effective Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Next Action Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >CP Item Due Date</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Expiration Date</span
+                        ></lightning:layoutItem
+                        >
+
+                        <aura:if isTrue="{!v.intakeItem.Copy_Files_to_AL_PCL__c}">
+                        <lightning:layoutItem class="mySubrowHeader header-column-map"
+                            ><span style="vertical-align: middle"
+                            >Map Files</span
+                            ></lightning:layoutItem
+                        >
+                        </aura:if>
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-status"
+                        >Status</lightning:layoutItem
+                        >
+                        <lightning:layoutItem size="1" class="mySubrowHeader indentText"
+                        >Include Client Comments</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-comments"
+                        ><span style="vertical-align: middle; padding-left: 12px"
+                            >CSC Team Comment</span
+                        ></lightning:layoutItem
+                        >
+                        <aura:if isTrue="{!v.intakeItem.Is_Financial__c}">
+                        <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader indentText"
+                            >Create Financial Record</lightning:layoutItem
+                        >
+                        </aura:if>
+                    </lightning:layout>
+
+                    <aura:iteration
+                        items="{!v.aclSchoolItems}"
+                        var="ai"
+                        indexVar="indx"
+                    >
+                        <aura:if
+                        isTrue="{!and(ai.CSC_Action_List__r.Account__r.RecordTypeId == v.SchoolAcctRecordType, ai.RecordTypeId != v.CSCActionItemSalesRecordType)}"
+                        >
+                        <c:ActionClientPortalItemRow
+                            aura:id="oppschchild"
+                            IsPCL="False"
+                            IsCharterAccount="{!ai.CSC_Action_List__r.Account__r.RecordTypeId == v.CharterAcctRecordType}"
+                            ai="{!ai}"
+                            cpi="{!v.intakeItem}"
+                        />
+                        </aura:if>
+                    </aura:iteration>
+                    </aura:if>
+
+                    <!--Oppportunity-->
+                    <aura:if
+                    isTrue="{!and(v.intakeItem.Update_PCL__c,v.numPCLItems>0)}"
+                    >
+                    <br />
+                    <b>Oppportunity</b>
+
+                    <lightning:layout multipleRows="false" class="mySubrowHeader">
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-one header-column-noleft"
+                        ><span style="vertical-align: middle"
+                            >Opportunity</span
+                        ></lightning:layoutItem
+                        >
+
+                        <lightning:layoutItem
+                        class="mySubrowHeader header-column-status"
+                        ><span style="vertical-align: middle; padding-left: 12px"
+                            >Status</span
+                        ></lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader header-column-noleft"
+                        ><span style="vertical-align: middle; padding-left: 12px"
+                            >Include Client Comments</span
+                        ></lightning:layoutItem
+                        >
+                    </lightning:layout>
+
+                    <aura:iteration items="{!v.pclItems}" var="ai" indexVar="indx">
+                        <aura:if
+                        isTrue="{!ai.RecordTypeId == v.CSCActionItemSalesRecordType}"
+                        >
+                        <c:ActionClientPortalItemRow
+                            aura:id="pclchild"
+                            IsPCL="True"
+                            IsCharterAccount="{!ai.CSC_Action_List__r.Account__r.RecordTypeId == v.CharterAcctRecordType}"
+                            ai="{!ai}"
+                            cpi="{!v.intakeItem}"
+                        />
+                        </aura:if>
+                    </aura:iteration>
+                    </aura:if>
+
+                    <!--Lease Compliance-->
+                    <aura:if
+                    isTrue="{!and(v.intakeItem.Update_Lease_Compliance__c,v.numLeaseComplianceItems>0)}"
+                    >
+                    <br />
+                    <b>Lease Compliance</b>
+
+                    <lightning:layout
+                        multipleRows="false"
+                        verticalAlign="middle"
+                        class="mySubrowHeader"
+                    >
+                        <lightning:layoutItem
+                        size="2"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Lease Compliance</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Coverage Window</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Tenant</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="2"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Property</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Map to Lease Compliance</lightning:layoutItem
+                        >
+                        <aura:if isTrue="{!v.intakeItem.Copy_Files_to_AL_PCL__c}">
+                        <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Map Files</lightning:layoutItem
+                        >
+                        </aura:if>
+
+                        <lightning:layoutItem
+                        size="1"
+                        class="mySubrowHeader slds-var-p-horizontal_small"
+                        >Include Client Comments</lightning:layoutItem
+                        >
+                        <lightning:layoutItem
+                        class="mySubrowHeader slds-var-p-horizontal_small slds-grow"
+                        >CSC Team Comment</lightning:layoutItem
+                        >
+                        <!-- <aura:if isTrue="{!v.intakeItem.Is_Financial__c}">
+                                        <lightning:layoutItem size="1" class="mySubrowHeader slds-var-p-horizontal_small">Create Financial Record</lightning:layoutItem> 
+                                    </aura:if> -->
+                    </lightning:layout>
+
+                    <aura:iteration
+                        items="{!v.leaseComplianceItems}"
+                        var="lc"
+                        indexVar="indx"
+                    >
+                        <c:ActionClientPortalItemLeaseComplianceRow
+                        aura:id="lcchild"
+                        lc="{!lc}"
+                        cpi="{!v.intakeItem}"
+                        ></c:ActionClientPortalItemLeaseComplianceRow>
+                    </aura:iteration>
+                    </aura:if>
+
+                    <!--Property Tax-->
+                    <aura:if isTrue="{!and(v.intakeItem.Update_Property_Tax__c,v.numPropertyTaxItems>0)}">
+                        <br />
+                        <b>Property Tax</b>
+
+                        <lightning:layout
+                            multipleRows="false"
+                            verticalAlign="middle"
+                            class="mySubrowHeader">
+                            
+                            <!-- Name -->
+                            <lightning:layoutItem
+                            size="1.5"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Property Tax</lightning:layoutItem>
+                            
+                            <!-- Parcel -->
+                            <lightning:layoutItem
+                            size="1.5"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Parcel</lightning:layoutItem>
+                            
+                            <!-- Tax Year -->
+                            <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Tax Year</lightning:layoutItem>
+                            
+                            <!-- Amout Due -->
+                            <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Amount Due</lightning:layoutItem>
+                            
+                            <!-- Map to property tax -->
+                            <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Map To Prop Tax</lightning:layoutItem>
+
+                            <!-- Outstanding $ -->
+                            <lightning:layoutItem
+                                size="1"
+                                class="mySubrowHeader slds-var-p-horizontal_small"
+                                >Outstanding $</lightning:layoutItem>
+                            
+                            <!-- Paid Amount -->
+                            <lightning:layoutItem
+                                size="1"
+                                class="mySubrowHeader slds-var-p-horizontal_small"
+                                >Paid Amount</lightning:layoutItem>
+                            
+                                <!-- Paid Date -->
+                            <lightning:layoutItem
+                            size="1"
+                            class="mySubrowHeader slds-var-p-horizontal_small"
+                            >Paid Date</lightning:layoutItem>
+                            
+                            <!-- Map Files -->
+                            <aura:if isTrue="{!v.intakeItem.Copy_Files_to_AL_PCL__c}">
+                                <lightning:layoutItem
+                                size="1"
+                                class="mySubrowHeader slds-var-p-horizontal_small"
+                                >Map Files</lightning:layoutItem>
+                            </aura:if>
+                            
+                            <!-- Include Client Comments -->
+                            <lightning:layoutItem
+                            class="mySubrowHeader slds-var-p-horizontal_small slds-grow"
+                            >Include Client Comments</lightning:layoutItem>
+                            
+                            <!-- CSC Team Comments -->
+                            <lightning:layoutItem
+                            class="mySubrowHeader slds-var-p-horizontal_small slds-grow"
+                            >CSC Team Comments</lightning:layoutItem>
+
+                        </lightning:layout>
+
+                        <aura:iteration
+                            items="{!v.propertyTaxItems}"
+                            var="pt"
+                            indexVar="indx">
+                            <c:ActionClientPortalItemPropertyTaxRow
+                                aura:id="ptchild"
+                                pt="{!pt}"
+                                cpi="{!v.intakeItem}">
+                            </c:ActionClientPortalItemPropertyTaxRow>
+                        </aura:iteration>
+
+                    </aura:if>
+
+                <br />
+
+                <!--buttons if we have items-->
+                <lightning:button label="Save" onclick="{!c.save}" />
+                <lightning:button label="Close" onclick="{!c.close}" />
+
+            </div>
+        </aura:set>
+      </aura:if>
+    </aura:set>
+  </aura:if>
+</aura:component>

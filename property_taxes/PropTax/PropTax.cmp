@@ -1,0 +1,45 @@
+<aura:component >
+    <aura:attribute name="PropTax" type="Property_Tax__c" />
+    <aura:attribute name="propertyId" type="Id" />
+    <aura:registerEvent name="refreshEvent" type="c:FacilitiesParentRefreshEvent"/>
+    
+
+    
+	<lightning:recordViewForm recordId="{!v.PropTax.id}" objectApiName="Property_Tax__c">
+        <lightning:layout horizontalAlign="left" verticalAlign="center" class="header-data slds-border_bottom" multipleRows="true" >  
+            <!--Edit-->
+            <div style="width:40px;vertical-align:middle;text-align:right;" >
+                <a onclick="{!c.editTax}" styleClass="btn ">Edit</a>
+            </div>
+            <!--1 Prop tax number-->
+            <lightning:layoutItem size="2" flexibility="auto" class="header-data">
+                <a  onclick="{!c.viewTax}" styleClass="btn">{!v.PropTax.Name}</a>
+            </lightning:layoutItem>
+            <!--2 Status-->
+            <lightning:layoutItem size="1" flexibility="auto" class="header-data">{!v.PropTax.Property_Tax_Status__c}</lightning:layoutItem>
+            <!--3 Payment Status-->
+            <lightning:layoutItem size="1" flexibility="auto" class="header-data">{!v.PropTax.Status__c}</lightning:layoutItem>
+            <!--4 Tax Year-->
+            <lightning:layoutItem size="2" flexibility="auto" class="header-data">
+                {!v.PropTax.Tax_Year_Number__c}
+            </lightning:layoutItem>
+            <!--5 Total Amount Due-->
+            <lightning:layoutItem size="1" flexibility="auto" class="header-data">
+                <lightning:formattedNumber value="{!v.PropTax.Total_Amount_Due__c}" style="currency" currencyCode="USD"/>
+            </lightning:layoutItem>
+            <!--6 Outstanding Balance-->
+            <lightning:layoutItem size="1" flexibility="auto" class="header-data">
+                <lightning:formattedNumber value="{!v.PropTax.Outstanding_Balance__c}" style="currency" currencyCode="USD"/>
+            </lightning:layoutItem>
+            <!--7 Due Date-->
+            <lightning:layoutItem size="2" flexibility="auto" class="header-data">
+                <ui:outputDate value="{!v.PropTax.X1st_Tax_Due_Date__c}" format="MM/dd/yyyy" />
+            </lightning:layoutItem> 
+            <!--8 Tax Exemption Status-->
+            <lightning:layoutItem size="1" flexibility="auto" class="header-data">
+                {!v.PropTax.Property_Exemption_Status__c}
+            </lightning:layoutItem> 
+
+        </lightning:layout>
+    </lightning:recordViewForm>
+</aura:component>

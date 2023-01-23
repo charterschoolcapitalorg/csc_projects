@@ -1,0 +1,15 @@
+.THIS .header-column-one {
+    vertical-align:middle;
+    padding-left:12px;
+	width:300px;
+}
+.THIS .header-column-map {
+    padding-left:6px;
+    vertical-align:middle;
+    width:145px;
+}
+.THIS .indentText{
+    padding-left:20px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break:clone;
+}
