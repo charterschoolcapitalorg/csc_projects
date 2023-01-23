@@ -1,0 +1,26 @@
+.THIS .bgColor{
+  background-color: white; 
+}
+
+.THIS .propertyHeader {
+    font-size: 20px; 
+    margin-top:5px;
+    
+}
+.THIS .propertyDetail {
+    font-size: 15px; 
+    color:#000000;
+    margin-left:5px;
+}
+.THIS .right-align {
+    text-align: right;
+}
+.THIS .header-column {    
+    vertical-align:middle;
+}
+.THIS .header-column-small {
+    vertical-align:middle;
+}
+.THIS.myBtnLong  {
+    width: 80px;
+}

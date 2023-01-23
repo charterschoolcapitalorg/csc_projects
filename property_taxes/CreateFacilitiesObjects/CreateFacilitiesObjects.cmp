@@ -1,0 +1,159 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,flexipage:availableForRecordHome,force:hasRecordId,lightning:isUrlAddressable" 
+                controller="CreateFacilitiesObjectsCtrl">
+    
+    
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />  
+    <aura:handler event="force:showToast" action="{!c.doInit}"/>
+    <aura:handler name="refreshEvent" event="c:FacilitiesParentRefreshEvent" action="{!c.doInit}"/>
+    
+    <aura:attribute name="fromObjectId" type="Id" />
+    <aura:attribute name="propertyId" type="Id" />
+    <aura:attribute name="Property" type="Account" />
+    <aura:attribute name="Buildings" type="Building__c[]" />
+    <aura:attribute name="Suites" type="Suite__c[]" />
+    <aura:attribute name="Leases" type="Lease__c[]" />
+    <aura:attribute name="Tenants" type="Tenant__c[]" />
+    <aura:attribute name="LeaseSuites" type="Lease_Suite__c[]" />
+	<aura:attribute name="Parcels" type="Parcel__c[]" />
+    <aura:attribute name="PropTaxes" type="Property_Tax__c[]" />
+    <aura:attribute name="LeaseCompliances" type="Lease_Compliance__c[]" />
+    <aura:attribute name="LeaseSchools" type="Lease_School__c[]" />
+    <aura:attribute name="RelatedContacts" type="Related_Contact__c[]" />
+    <aura:attribute name="AssetChecklist" type="String" />
+    <aura:attribute name="AcqChecklist" type="String" />
+    <aura:attribute name="FinChecklist" type="String" />
+    
+    
+    
+    <lightning:navigation aura:id="navService"/>
+	    
+    <ltng:require styles="{!$Resource.facilitiesui}" />
+    
+        
+    <lightning:card footer="" >
+        
+        
+        <aura:set attribute="title">
+            <b>
+                <div class="propertyHeader">
+                    <a onclick="{!c.viewProp}" styleClass="btn ">{!v.Property.Name} ({!v.Property.Nick_Name__c})</a><br/>
+                </div>
+            </b>
+    	</aura:set>
+        
+        &nbsp;&nbsp;&nbsp;&nbsp;<a onclick="{!c.editProp}" styleClass="btn ">
+                    Edit Property
+        </a>&nbsp;&nbsp;
+        
+        
+        <aura:set attribute="actions">
+            
+            <lightning:button label="Close" onclick="{!c.close}"/>
+        </aura:set>
+        
+        <lightning:layout multipleRows="true" >
+        
+        <lightning:layoutItem size="6" >
+        </lightning:layoutItem>
+            
+        <lightning:layoutItem size="2" >
+			<lightning:button class="slds-size_full"  label="Acquisitions Checklist"  onclick="{!c.getAcq}"/> 
+        </lightning:layoutItem>
+        <lightning:layoutItem size="2" >
+			<lightning:button class="slds-size_full"  label="Asset Management Checklist"  onclick="{!c.getAsset}"/>             
+        </lightning:layoutItem>
+        <lightning:layoutItem size="2" >
+			<lightning:button class="slds-size_full"  label="Financials Checklist"  onclick="{!c.getFinancials}"/>             
+        </lightning:layoutItem>
+        </lightning:layout>
+    
+        
+    	<br/>
+    	
+        <lightning:layout multipleRows="true" >
+            <lightning:layoutItem size="5" class="propertyDetail"><b>Location: </b>
+                {!v.Property.BillingCity}, {!v.Property.BillingState}
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"><b>Adjusted Purchase Price: </b> 
+                <lightning:formattedNumber value="{!v.Property.Adjusted_Purchased_Price__c}" style="currency" currencyCode="USD"/>
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"><b>Net Rentable Area: </b>
+                {!v.Property.Net_Rentable_Area__c}
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail">
+                <b>Adjusted Cap Rate: </b> 
+                <lightning:formattedNumber value="{!v.Property.Adjusted_Cap_Rate__c/100}" style="percent"/>
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"><b>Gross Land Area: </b>
+                <lightning:formattedNumber value="{!v.Property.Gross_Land_Area__c}"/>
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"> <b>Initial Purchase Price: </b> 
+                <lightning:formattedNumber value="{!v.Property.Purchase_Price__c}" style="currency" currencyCode="USD"/>
+            </lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"></lightning:layoutItem>
+            <lightning:layoutItem size="5" class="propertyDetail"><b>Acquisition Date: </b>
+                <ui:outputDate  value="{!v.Property.Acquisition_Date__c}" format="MM/dd/yyyy" />
+            </lightning:layoutItem>
+    	</lightning:layout>
+    </lightning:card>
+        
+    
+    <lightning:card footer="">
+        <c:Buildings  Buildings="{!v.Buildings}" Property="{!v.Property}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:Suites  Suites="{!v.Suites}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:Leases  Leases="{!v.Leases}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:Tenants  Tenants="{!v.Tenants}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:LeaseSuites  LeaseSuites="{!v.LeaseSuites}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:LeaseCompliances  LCs="{!v.LeaseCompliances}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:LeaseSchools  LSs="{!v.LeaseSchools}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:Parcels  Parcels="{!v.Parcels}" Property="{!v.Property}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <lightning:card footer="">
+        <c:PropTaxes  PropTaxes="{!v.PropTaxes}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+	<lightning:card footer="">
+        <c:RelatedContacts  Contacts="{!v.RelatedContacts}" propertyId="{!v.propertyId}"/>
+    </lightning:card>
+    
+    <br/>
+    <br/>
+    <br/>
+    
+    <lightning:workspaceAPI aura:id="workspace"/>
+	
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    
+</aura:component>

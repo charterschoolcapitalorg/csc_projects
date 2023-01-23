@@ -1,0 +1,42 @@
+<aura:component implements="flexipage:availableForRecordHome" 
+                controller="CreateFacilitiesObjectsCtrl">
+    
+                
+    <aura:attribute name="PropTaxes" type="Property_Tax__c[]" />
+    <aura:attribute name="propertyId" type="Id" />
+    <aura:registerEvent name="refreshEvent" type="c:FacilitiesParentRefreshEvent"/>
+    
+   
+    
+    <span style="background-color:#a1dee9;">
+	<lightning:layout multipleRows="false" >
+        <lightning:layoutItem size="1" class=" buildingHeader">
+            <b>Property Taxes: </b> 
+        </lightning:layoutItem>
+        <lightning:layoutItem size="11" >
+           
+        </lightning:layoutItem>
+    </lightning:layout>
+        
+    <lightning:layout multipleRows="true" class="mySubrowHeader header-column">   
+         <div style="width:40px;"></div>      
+         <lightning:layoutItem size="2" flexibility="auto" class="mySubrowHeader header-column">Property Tax Ref #</lightning:layoutItem>
+         <lightning:layoutItem size="1" flexibility="auto" class="mySubrowHeader header-column">Status</lightning:layoutItem>
+         <lightning:layoutItem size="1" flexibility="auto" class="mySubrowHeader header-column">Payment Status</lightning:layoutItem>
+         <lightning:layoutItem size="2" flexibility="auto" class="mySubrowHeader header-column">Tax Year</lightning:layoutItem>
+         <lightning:layoutItem size="1" flexibility="auto" class="mySubrowHeader header-column">Total Amount Due</lightning:layoutItem>
+         <lightning:layoutItem size="1" flexibility="auto" class="mySubrowHeader header-column">Outstanding Balance</lightning:layoutItem> 
+         <lightning:layoutItem size="2" flexibility="auto" class="mySubrowHeader header-column">Due Date</lightning:layoutItem> 
+         <lightning:layoutItem size="1" flexibility="auto" class="mySubrowHeader header-column">Tax Exemption Status</lightning:layoutItem> 
+         
+     </lightning:layout>
+    </span>
+    
+    
+    <span >
+    <aura:iteration items="{!v.PropTaxes}" var="b" indexVar="indx">
+        <c:PropTax  PropTax="{!b}" propertyId="{!v.propertyId}"/>
+    </aura:iteration>
+    </span>
+    
+</aura:component>
