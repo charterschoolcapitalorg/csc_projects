@@ -1,0 +1,198 @@
+.THIS .slds-page-header{
+display:none;
+}
+
+.THIS .mySubrowHeader {
+    background-color:#00558C;
+    margin-top:5px;
+	margin-bottom:5px;
+	color:#FFFFFF;
+    width:100%;
+    /*width:1305px;*/
+}
+.THIS .mySubrowHeader2 {
+    width:100%;
+}
+
+.THIS .longrow {
+    width:100%;
+}
+
+.THIS .dividerrow {
+    width:100%;
+    font-weight: bold;
+    background-color:#e6e6e6;
+}
+
+.THIS .firstpicklist {
+    display: inline-block;
+    align: right;
+    width: 250px;
+}
+.THIS .picklist {
+    padding-left:12px;
+    display: inline-block;
+    align: right;
+    width: 100px;
+}
+.THIS .picklistlarge {
+    padding-left:12px;
+    display: inline-block;
+    align: right;
+    width: 150px;
+}
+.THIS .picklistsmall {
+    padding-left:12px;
+    display: inline-block;
+    align: right;
+    width: 80px;
+}
+.THIS .lowerit {
+   padding-top:5px; 
+}
+
+.THIS .lowerit2 {
+   padding-top:15px; 
+   margin-left:5px;
+}
+
+.THIS .right-align {
+    /*float:right;
+    align: right;
+    margin-right: auto;*/
+    margin-right: 5px;
+    
+}
+.THIS .left-align {
+    /*float:right;
+    align: right;
+    margin-right: auto;*/
+    margin-left: 5px;
+    
+}
+.THIS .buttons {
+    width: 900px;
+}
+
+.THIS .mybutton {
+    width: 110px;
+}
+.THIS .dtpicker {
+    padding-left:12px;
+    display: inline-block;
+    align: right;
+    width: 150px;
+}
+
+
+.THIS .header-column-one-blue {
+    vertical-align:middle;
+	width:175px;
+    text-align: center;
+    background-color:#00558C;
+}
+.THIS .header-column-one {
+    vertical-align:middle;
+	width:175px;
+    text-align: center;
+}
+.THIS .data-column-medium {
+    color:#000000;
+    word-wrap: break-word;
+    margin-top:5px;
+    vertical-align:top;
+    width:175px;
+    font-size:12px;
+    
+}
+.THIS .header-column-one-icon {
+    vertical-align:middle;
+	width:30px;
+    text-align: center;
+    background-color:#00558C;
+}
+.THIS .data-column-icon {
+    color:#000000;
+    margin-top:5px;
+    vertical-align:top;
+    width:30px;
+    text-align: center;
+    font-size:12px;
+}
+
+.THIS .header-column-small {
+    vertical-align:middle;
+    width:70px;
+    font-size:12px;
+    text-align: center;
+}
+.THIS .header-column-small-blue {
+    vertical-align:middle;
+    width:70px;
+    font-size:12px;
+    text-align: center;
+    background-color:#00558C;
+}
+.THIS .data-column-small {
+    color:#000000;
+    word-wrap: break-word;
+    margin-top:5px;
+    vertical-align:top;
+    width:70px;
+    font-size:12px;
+    text-align: center;
+}
+
+
+.THIS .data-negative {
+    color:red;
+    text-align: center;
+}
+.THIS .data-negative-formula {
+    color:red;
+    text-align: center;
+}
+.THIS .data-formula {
+    color:black;
+    text-align: center;
+}
+.THIS .data-normal {
+    color:black;
+	text-align: center;
+}
+
+.THIS .whitebackground {
+    color:white;
+}
+
+.THIS a:hover {
+	color: white;
+}
+.THIS a:link {
+   color: white;
+}
+.THIS a {
+	color: white;
+}
+.THIS a:active{
+  	color: white;
+}
+
+
+
+.THIS .bodysection {
+    margin-top:10px;
+    background-color: white;
+    z-index:5;
+}
+
+.THIS .headersection {
+     background:inherit;
+     z-index:10;
+     background-color: white;
+     position: sticky;
+     top:-10px;
+}
+.THIS .mainsection {
+   z-index:15; 
+}

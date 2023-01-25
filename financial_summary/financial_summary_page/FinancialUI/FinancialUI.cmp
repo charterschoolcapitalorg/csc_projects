@@ -1,0 +1,241 @@
+<aura:component implements="force:hasRecordId,flexipage:availableForRecordHome,force:lightningQuickActionWithoutHeader" 
+                controller="FinancialCtrl">
+    <aura:handler name="init" value="{! this }" action="{! c.init }"/>
+    <aura:attribute name="cssStyle" type="String"/>
+    
+    <aura:html tag="style">
+        .cuf-scroller-outside {
+        background-color: yellow;
+        !important; 
+        }
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        
+    </aura:html>
+    
+    <ltng:require styles="{!$Resource.facilitiesui}" />
+    
+    <!-- attributes -->
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="data" type="FinancialCtrl.DataWrapper[]" />
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute name="columnwrappers" type="FinancialCtrl.ColumnWrapper[]"/>
+    <aura:attribute name="accountname" type="String" />
+    <aura:attribute name="accounts" type="Account[]" />
+    <aura:attribute name="fiscalyears" type="String[]" />
+    <aura:attribute name="Spinner" type="boolean" default="false"/>
+    <aura:attribute name="showfiles" type="boolean" default="false"/>
+    <aura:attribute name="showBudgetComments" type="boolean" default="false"/>
+    <aura:attribute name="showfileid" type="String" />
+    <aura:attribute name="reportid" type="String" />
+    <aura:attribute name="recordSaved" type="Boolean" default="false"/>
+    
+    <aura:if isTrue="{!v.Spinner}">
+        <lightning:spinner alternativeText="Loading" size="medium" />
+    </aura:if>
+    
+    <aura:attribute name="typefilter" type="String" default="Quarterly/Annual"/>  
+    <aura:attribute name="auditfilter" type="String" default="All"/>
+    <aura:attribute name="acctfilter" type="String" />
+    <aura:attribute name="accId" type="String" />
+    <aura:attribute name="viewType" type="String" />
+    
+    <aura:attribute name="startdatefq" type="String" /> 
+    <aura:attribute name="enddatefq" type="String" /> 
+    <aura:attribute name="startdatefy" type="String" /> 
+    <aura:attribute name="enddatefy" type="String" /> 
+    
+    <aura:attribute name="screensize" type="Integer" /> 
+    <aura:attribute name="maxscreensize" type="Integer" />
+    
+    <!-- <aura:handler name="change" value="{!v.recordSaved}" action="{!c.handleToast}"/>
+    <aura:registerEvent name="showToast" type="force:showToast" />-->
+    <div class="mainsection" style="{!'width:' + (v.maxscreensize > v.screensize ? '100%' : v.screensize) + 'px;'}"> 
+        <!--  -->
+        <div class="headersection">
+            <!--Header start: filters and buttons-->
+            <lightning:layout   multipleRows="false" class="">
+                <!--Account picklist-->
+                <lightning:layoutItem class="" >
+                    <lightning:select label="Account:&nbsp;" class="firstpicklist" value="{!v.acctfilter}" aura:id="acctfilter" name="acctfilter" >
+                        <aura:iteration items="{!v.accounts}" var="opt">  
+                            <option value="{!opt.Id}" > {!opt.Name} ( {!opt.RecordType.Name} ) </option>
+                        </aura:iteration>
+                        
+                    </lightning:select>
+                    <br/>
+                </lightning:layoutItem>
+                
+                <!--Type picklist-->
+                <lightning:layoutItem class="">
+                    <lightning:select label="Type:&nbsp;" class="picklistlarge" value="{!v.typefilter}" aura:id="typefilter" name="typefilter" >
+                        <option value="Quarterly/Annual">Quarterly/Annual</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Annual">Annual</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Monthly/Annual">Monthly/Annual</option>
+                        <option value="BudgetvActual">Budget v Actual</option>
+                    </lightning:select>
+                    <br/>
+                </lightning:layoutItem>
+                
+                <!--Audit Status picklist-->
+                <lightning:layoutItem class="" >
+                    <lightning:select disabled="{!v.typefilter=='BudgetvActual'}" label="Audit Status:&nbsp;" class="picklist" value="{!v.auditfilter}" aura:id="auditfilter" name="auditfilter" >
+                        <option selected="true" value="All">All</option>
+                        <option value="Audited">Audited</option>
+                        <option value="Unaudited">Unaudited</option>
+                    </lightning:select>
+                    <br/>
+                </lightning:layoutItem>
+
+                <!--Start FQ & FY picklist-->
+                <lightning:layoutItem >
+                    <lightning:layout multipleRows="false" >
+                        <lightning:layoutItem  >
+                            <lightning:select disabled="{!v.typefilter=='Monthly' || v.typefilter=='Monthly/Annual' || v.typefilter=='Annual'}" label="Start FQ:&nbsp;" class="picklistsmall" value="{!v.startdatefq}" aura:id="startdatefq" name="startdatefq" >
+                                <option selected="true" value="All">All</option>
+                                <option value="Q1">Q1</option>
+                                <option value="Q2">Q2</option>
+                                <option value="Q3">Q3</option>
+                                <option value="Q4">Q4</option>
+                            </lightning:select>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem  >
+                            <lightning:select disabled="{!v.typefilter=='Monthly' || v.typefilter=='Monthly/Annual' || v.typefilter=='BudgetvActual'}" label="Start FY:&nbsp;" class="picklistsmall" value="{!v.startdatefy}" aura:id="startdatefy" name="startdatefy" >
+                                <option value="All">All</option>
+                                <aura:iteration items="{!v.fiscalyears}" var="opt">  
+                                    <option selected="{!v.startdatefy == opt}" value="{!opt}" > {!opt} </option>
+                                </aura:iteration>
+                            </lightning:select>
+                            <br/>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </lightning:layoutItem>
+                
+                <!--End FQ & FY picklist-->
+                <lightning:layoutItem >
+                    <lightning:layout multipleRows="false" >
+                        <lightning:layoutItem  >
+                            <lightning:select disabled="{!v.typefilter=='Monthly' || v.typefilter=='Monthly/Annual' || v.typefilter=='Annual'}" label="End FQ:&nbsp;" class="picklistsmall" value="{!v.enddatefq}" aura:id="enddatefq" name="enddatefq" >
+                                <option selected="true" value="All">All</option>
+                                <option value="Q1">Q1</option>
+                                <option value="Q2">Q2</option>
+                                <option value="Q3">Q3</option>
+                                <option value="Q4">Q4</option>
+                            </lightning:select>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem  >
+                            <lightning:select label="End FY:&nbsp;" class="picklistsmall" value="{!v.enddatefy}" aura:id="enddatefy" name="enddatefy" >
+                                <option  value="All">All</option>
+                                <aura:iteration items="{!v.fiscalyears}" var="opt">  
+                                    <option selected="{!v.enddatefy==opt}" value="{!opt}" > {!opt} </option>
+                                </aura:iteration>
+                            </lightning:select>
+                            <br/>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </lightning:layoutItem>
+                
+                <!--Buttons-->
+                <lightning:layoutItem class="lowerit left-align" >
+                    &nbsp;&nbsp;&nbsp;<lightning:button class="mybutton" label="Apply Filters" onclick="{!c.applyFilters}"/>
+                </lightning:layoutItem>
+                <lightning:layoutItem class="lowerit left-align" >
+                    &nbsp;&nbsp;&nbsp;<lightning:button class="mybutton" label="Reset Filters" onclick="{!c.resetFilters}"/>
+                </lightning:layoutItem>
+                <lightning:layoutItem  class="buttons right-align" >
+                    <lightning:layout multipleRows="false"  horizontalAlign="end" >                
+                        <aura:if isTrue="{!v.viewType=='BudgetvActual'}">
+                            <lightning:layoutItem class="lowerit2">       
+                                <div class="{! 'slds-section' + (v.showBudgetComments ? ' slds-is-open' : '')}">
+                                    <button aria-controls="divContent" aria-expanded="{!v.showBudgetComments}" onclick="{!c.changeState}" class="button slds-button slds-button_neutral right-align">
+                                        <span class="slds-truncate" title="Section Title">Update variance comments</span>
+                                    </button>
+                                </div>
+                            </lightning:layoutItem>
+                        </aura:if>
+                        <aura:if isTrue="{!v.viewType!='BudgetvActual'}">
+                            <lightning:layoutItem class="lowerit">       
+                                <!-- <br/>&nbsp;&nbsp;&nbsp;<lightning:button class="button" label="Export Data" onclick="{!c.exportData}"/> -->
+                                <br/>&nbsp;&nbsp;&nbsp;<lightning:button class="button" label="Export Data" onclick="{!c.exportCongaReport}"/>
+                            </lightning:layoutItem>
+                        </aura:if>
+                        <lightning:layoutItem class="lowerit"> 
+                            <br/>&nbsp;&nbsp;&nbsp;<lightning:button class="button" label="Back" onclick="{!c.close}"/>
+                        </lightning:layoutItem>
+                    </lightning:layout> 
+                </lightning:layoutItem>   
+            </lightning:layout>
+            <!--Header end: filters and buttons-->
+
+            <!--BudgetvActual TODO: what is it and how is it working??-->
+            <lightning:layout multipleRows="false" class="">
+                <aura:if isTrue="{!v.viewType=='BudgetvActual'}">
+                    <lightning:layoutItem size="12" class="mySubrowHeader2">       
+                        <div class="{! 'slds-section' + (v.showBudgetComments ? ' slds-is-open' : '')}">
+                            <div class="slds-section__content slds-list_horizontal" aria-hidden="{!!v.showBudgetComments}" id="divContent">
+                                <c:FinancialBudgetComments showBudgetComments="{!v.showBudgetComments}" startdatefq="{!v.startdatefq}" enddatefq="{!v.enddatefq}" enddatefy="{!v.enddatefy}" accId="{!v.recordId}" recordSaved="{!v.recordSaved}"></c:FinancialBudgetComments>
+                            </div>
+                        </div>
+                    </lightning:layoutItem>
+                </aura:if>
+            </lightning:layout>
+
+
+            <lightning:layout multipleRows="false" class="mySubrowHeader headersection">
+                <lightning:layoutItem flexibility="no-shrink, grow"  class="header-column-one-blue"></lightning:layoutItem>
+                <lightning:layoutItem flexibility="no-shrink, grow" class="header-column-one-icon"></lightning:layoutItem>
+                <aura:iteration  items="{!v.columnwrappers}" var="col" indexVar="indx">
+                    <lightning:layoutItem flexibility="no-shrink, grow" class="header-column-small-blue">
+                        <aura:if isTrue="{!col.objectid==''}">
+                            {!col.columnname}
+                            <aura:set attribute="else">
+                                <a class="whitebackground" aura:id="{!col.objectid}" id="{!col.objectid}" onclick="{!c.openItem}" >{!col.columnname} </a>
+                            </aura:set>
+                        </aura:if>
+                    </lightning:layoutItem>
+                </aura:iteration>
+            </lightning:layout>
+            
+            <lightning:layout multipleRows="false"  class="headersection">
+                <lightning:layoutItem flexibility="no-shrink, grow"  class="header-column-one"></lightning:layoutItem>
+                <lightning:layoutItem flexibility="no-shrink, grow" class="data-column-icon"></lightning:layoutItem>
+                <aura:iteration  items="{!v.columnwrappers}" var="col" indexVar="indx">
+                    <lightning:layoutItem flexibility="no-shrink, grow" class="header-column-small">
+                        <aura:if isTrue="{!col.objectid==''}">
+                            &nbsp;
+                            <aura:set attribute="else">
+                                <c:FinancialFiles column="{!col.columnname}" finObjId="{!col.objectid}"></c:FinancialFiles>
+                            </aura:set>
+                        </aura:if>
+                    </lightning:layoutItem>
+                </aura:iteration>
+            </lightning:layout>
+        </div> 
+        
+        <!--Table Itself-->
+        <div class="bodysection">
+            <aura:iteration  items="{!v.data}" var="d" indexVar="indx">
+                <aura:if isTrue="{!d.Name =='BLANK'}">
+                    <c:FinancialUIDataRow aura:id="datarow" columns="{!v.columns}" rowdata="{!d}" />
+                    <aura:set attribute="else">
+                        <aura:if isTrue="{!d.isDivider}">
+                            <div class="slds-border_bottom longrow dividerrow">
+                                <c:FinancialUIDataRow aura:id="datarow" columns="{!v.columns}" rowdata="{!d}" />
+                            </div>
+                            <aura:set attribute="else">
+                                <div class="slds-border_bottom longrow">
+                                    <c:FinancialUIDataRow aura:id="datarow" columns="{!v.columns}" rowdata="{!d}" viewType="{!v.viewType}"/>
+                                </div>
+                            </aura:set>
+                        </aura:if>
+                    </aura:set>
+                </aura:if>
+            </aura:iteration>
+        </div>
+        
+        <lightning:overlayLibrary aura:id="overlayLib"/>
+    </div>
+</aura:component>
