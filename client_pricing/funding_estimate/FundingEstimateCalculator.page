@@ -1,0 +1,1037 @@
+<!--
+/**=====================================================================
+ * Appirio, Inc
+ * Name: FundingEstimateCalculator
+ * Description: T-269750: Funding Estimate Tool - First Jaipur Spec
+ * Created Date: [04/08/2014]
+ * Created By: [Rahul Agrawal] (Appirio)
+ *
+ * Date Modified                Modified By                  Description of the update
+
+ * April 21, 2014               Manisha Gupta(Appirio)        T-273425 : Update all labels to be Custom Labels
+ * May 8, 2014                  Tony Montemorano(Appirio)     Removed prototype scripts, reused commented out mobile classes for buttons on step3
+ * Sep 19, 2022                 Slava Krel (CSC)              Funding Estimate Data Mapping for School over Charter Holder, changing UI
+ =====================================================================*/
+-->
+<apex:page standardController="Funding_Estimates__c" extensions="FundingEstimateCalculatorController"
+                        title="Funding Estimate Tool" id="page"
+                        sidebar="false" showHeader="false" standardStyleSheets="false">
+                        <!-- lightningStylesheets="true"> -->
+
+<apex:form id="form">
+<apex:actionFunction name="nextOnStep1" action="{!nextOnStep1}" onComplete="navigate('step2','tab2'); onLoadStep2(); " reRender="panel2"/>
+<apex:actionFunction name="nextOnStep2" action="{!nextOnStep2}" onComplete="navigate('step3','tab3'); onLoadStep3();" reRender="panel3"/>
+<apex:actionFunction name="PreviousOnStep3" action="{!PreviousOnStep3}" onComplete="navigate('step2','tab2');" />
+<apex:actionFunction name="previousOnStep2" action="{!PreviousOnStep2}" onComplete="navigate('step1','tab1');" />
+<apex:actionFunction name="saveOnStep1" action="{!saveOnStep1}"/>
+<apex:actionFunction name="saveOnStep2" action="{!saveOnStep2}"/>
+<apex:actionFunction name="saveOnStep3" action="{!saveOnStep3}"/>
+<apex:actionFunction name="saveAndGenerateInternalSummary" action="{!saveAndGenerateInternalSummary}"/>
+<apex:actionFunction name="saveAndGoFERecord" action="{!saveAndGoFERecord}"/>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <title>{!$Label.FE_Title}</title>
+    <!-- Bootstrap core CSS -->
+    <apex:stylesheet value="{!URLFOR($Resource.FundingEstimateCalculator, 'css/bootstrap.min.css')}"/>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet" type="text/css" />
+    <!-- Production Stylesheet -->
+    <apex:stylesheet value="{!URLFOR($Resource.FundingEstimateCalculator, 'css/main.css')}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+
+        .corner-ribbon{
+            width: 200px;
+            background: #EF9221;
+            position: absolute;
+            top: 25px;
+            left: -50px;
+            text-align: center;
+            line-height: 30px;
+            letter-spacing: 1px;
+            color: #f0f0f0;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+        }
+        .corner-ribbon.sticky{
+            position: fixed;
+        }
+        .corner-ribbon.shadow{
+            box-shadow: 0 0 3px rgba(0,0,0,.3);
+        }
+        .corner-ribbon.top-left{
+            top: 25px;
+            left: -50px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+        }
+
+        .customPopup{
+            background-color: rgb(233, 233, 233);
+            margin-top: 2%;
+            margin-left: 25%;
+            /* border-width: 2px; */
+            /* border-style: solid; */
+            text-align: center;
+            /* padding:10px; */
+            width: 50%;
+            height: auto;
+            color: black;
+            /* border-radius: 20px; */
+            /* border-bottom-left-radius: 10px; */
+            /* border-top-right-radius: 10px; */
+            box-shadow: 0px 7px 29px 0px #000000;
+        }
+        .popupBackground{
+            /* background-color:black; */
+            /* background-color: transparent; */
+            /* opacity: 0.0 - 1.0; */
+            background: rgba(0,0,0,0.5);
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+        }
+
+    </style>
+  </head>
+
+  <body>
+
+    <!-- ribbon -->
+    <div class="corner-ribbon top-left sticky red shadow" style="font-weight: bold; font-size:14px;">CSC</div>
+
+  <apex:PageMessages />
+  <div class="container">
+        <div class="row">
+            <div class="col-xs-12 page-header-fun-est">
+                <div class="col-xs-12 col-md-6 left-header">
+                    <h1>{!$Label.FE_Header}</h1>
+                </div>
+                <div class="col-xs-12 col-md-6 right-header">
+                    <p class="highlight">{!opp.Account.Name}
+                    </p>
+                    <p>{!$Label.FE_Header_Target_Funding_Date}
+                        <span class="pull-right highlight">
+                            <Apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                <apex:param value="{!opp.CloseDate}" />
+                                                </Apex:outputText></span>
+                    </p>
+                    <p>{!$Label.FE_Header_Target_Amount_Requested}
+                        <span class="pull-right highlight"><apex:outputText value="{0, number, $###,###}">
+                                       <apex:param value="{!opp.NET_Amount_Requested__c}"/>
+                                     </apex:outputText></span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-xs-12 sub-header">
+                <div class="col-sm-4 active" style="font-weight: bold;">1. {!$Label.FE_Page_1_Title}</div>
+                <div class="col-sm-4" style="font-weight: bold;">2. {!$Label.FE_Page_2_Title}</div>
+                <div class="col-sm-4" style="font-weight: bold;">3. {!$Label.FE_Page_3_Title}</div>
+            </div>
+        </div>
+    </div>
+    <!--Page 1 Start-->
+    <div class="container tab" id="step1">
+        <div class="row">
+            <div class="col-xs-12 carot">
+                {!$Label.FE_P1_Instruction}
+            </div>
+            <div class="col-xs-12 table-responsive">
+                <table class="table" id="schoolSelection">
+                    <thead>
+                        <tr>
+                            <th class="col1" style="font-weight: bold; font-size:18px">{!$Label.FE_P1_School_Name}</th>
+                            <th class="col2" style="font-weight: bold; font-size:18px">{!$Label.FE_P1_Receivable_Name}</th>
+                            <th class="col3" style="font-weight: bold; font-size:18px">{!$Label.FE_P1_Expected_Payout_Date}</th>
+                            <th class="col4" style="font-weight: bold; font-size:18px">{!$Label.FE_P1_Gross_Receivable_Amount}</th>
+                            <th class="col5" style="font-weight: bold; font-size:18px"><div class="checkbox"></div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <apex:repeat value="{!listFER}" var="fer">
+                            <tr>
+                                <td>{!fer.School__c}</td>
+                                <td style="width:35%">{!fer.Name}</td>
+                                <td><apex:outputText value="{0,date,MM/dd/yyyy}">
+                                        <apex:param value="{!fer.Expected_Pay_Date__c}" />
+                                    </apex:outputText>
+                                </td>
+                                <td><span class="grv">
+                                    <apex:outputText value="{0, number, $###,###}">
+                                       <apex:param value="{!fer.GRV_Amount__c}"/>
+                                     </apex:outputText></span>
+                                 </td>
+                                <td><div class="checkbox" style="display:{!if(fer.Already_Purchased__c,'none','block')};"></div>
+                                    <div style="display:{!if(fer.Already_Purchased__c,'block','none')};">Already Purchased</div>
+                                    <div style="display:none;">
+                                        <apex:inputField value="{!fer.Included_in_Estimate__c}" styleClass="includedInEstimate"/>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        </apex:repeat>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="font-weight: bold; font-size:18px"><span class="grvtotal">$000,000,000</span></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="row top-margin">
+            <div class="pull-right">
+                <button id="step1-btn" class="btn btn-primary pull-right">{!$Label.FE_Button_Next} ></button>
+                <button class="step1-save-btn btn btn-primary pull-right right-margin" onClick="saveOnStep1();return false;">{!$Label.FE_Button_Close}</button>
+            </div>
+        </div>
+    </div>
+    <!--Page 2 Start-->
+    <apex:outputPanel id="panel2">
+    <div class="container tab" id="step2">
+        <div class="row">
+            <div class="col-xs-12 carot form-horizontal">
+                <div class="control-group" style="float:right">
+                    <div class="form-inline">
+                        {!$Label.FE_P2_Instruction}
+                    </div>&nbsp;
+                    <div class="form-inline widget rounded">
+                        <label for="txtTransactionFee">{!$Label.FE_P2_Transaction_Fee}</label>
+                        <apex:inputText styleClass="rounded" id="txtTransactionFee" value="{!fundingEst.Transaction_Fee__c}" onKeyPress="disableEnter(this, event)this);"/>
+                        %&nbsp;&nbsp;&nbsp;
+                    </div>&nbsp;
+                </div>
+            </div>
+            <apex:repeat value="{!listFER_Step2}" var="oppWrapper">
+            <div class="col-xs-12 table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>
+                            <h3 style="font-size: 18px">{!oppWrapper.oppSchoolName}
+                                <apex:outputText styleClass="h4 text-danger" rendered="{!oppWrapper.charterTermination = null}" value=" (No charter terms listed)"/>
+                                <apex:outputText styleClass="h4 text-danger CharterTerms" value=" (Charter term expires - {0,date,MM'/'dd'/'yyyy})">
+                                    <apex:param value="{!oppWrapper.charterTermination}"/>
+                                </apex:outputText>
+                            </h3>
+                        </th>
+                        <th style="text-align:right">
+                            <!-- Discount Rate -->
+                            <!-- <label for="txtDiscountRate"> &nbsp;&nbsp;{!$Label.FE_P2_Discount_Rate} </label> -->
+                            <label for="txtDiscountRate"> Discount Rate </label>
+                            <apex:inputText styleClass="rounded" html-data-id="{!oppWrapper.oppSchoolName}{!oppWrapper.discountRateId}" value="{!oppWrapper.discountRateFinal}" onKeyPress="disableEnter(this, event);"/>
+                            %&nbsp;&nbsp;&nbsp;
+                            <!-- Info button -->
+                            <apex:commandbutton action="{!ShowPopup}" rerender="Details" value="info"></apex:commandbutton>
+                            <!-- Details modal popup -->
+                            <apex:outputpanel id="Details">
+                                <apex:outputpanel layout="block" rendered="{!DisplayPopUp}" styleclass="popupBackground">
+                                    <apex:outputpanel layout="block" rendered="{!DisplayPopUp}" styleclass="customPopup">
+                                        <table>
+                                            <tr>
+                                                <th>
+                                                    <p style="font-size:14px;">Discount Rate Breakdown</p>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                        <!-- <p style="color:green;">Opportunity record type: {!oppWrapper.recordType}, Pre-Year 0 Rate: {!oppWrapper.preYear0Funding}, Year 0 Rate: {!oppWrapper.year0Funding}, Intercept undefined</p> -->
+                                        <table>
+                                            <tr>
+                                                <td style="text-align:left">
+                                                    <p>5DF Funding Rate {!oppWrapper.fiveDayFundingRateCalc} %</p>
+                                                    <p>Pre-Year 0 Rate {!oppWrapper.preYear0FundingCalc} %</p>
+                                                    <p>Year 0 Rate {!oppWrapper.year0FundingCalc} %</p>
+                                                    <p>Intercept Rate {!oppWrapper.intercept} %</p>
+                                                </td>
+                                                <td style="text-align:left">
+                                                    <p>Pricing Discount Rate {!oppWrapper.targetEffectiveRate} %</p>
+                                                    <p>Total Adjustments {!oppWrapper.totalAdjustments} %</p>
+                                                    <p style="font-weight:bold;">Discount Rate {!oppWrapper.discountRateFinal} %</p>
+                                                </td>
+                                                <td style="vertical-align: bottom;">
+                                                    <apex:commandbutton action="{!ClosePopup}" rerender="Details" value="Close" ></apex:commandbutton>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                    </apex:outputpanel>
+                                </apex:outputpanel>
+                            </apex:outputpanel>
+                            <!-- Update Rates Button -->
+                            &nbsp;&nbsp;&nbsp;
+                            <button class="btn btn-tertiary" id="{!oppWrapper.oppSchoolName}{!oppWrapper.discountRateId}" onClick="calculateDiscountOnRateChange(id);return false;">Update Rates</button>
+                            
+                            <!-- Target Eff Rate -->
+                            <!-- <label for="txtEffectiveRate"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Targeted Effective Rate </label>
+                            <apex:inputText styleClass="rounded" html-data-id="{!oppWrapper.oppSchoolName}" value="{!oppWrapper.targetEffectiveRate}" onKeyPress="disableEnter(this, event);"/>
+                            %&nbsp;&nbsp;&nbsp;
+                            <button class="btn btn-tertiary" id="{!oppWrapper.oppSchoolName}" onClick="calculateDiscountFromEffective(id);return false;">Calc. Rates</button> -->
+                        </th>
+                    </tr>
+                </table>
+
+                <table class="table tableTab2" >
+                    <thead>
+                        <tr>
+                            <th class="col1" style="font-weight: bold;">{!$Label.FE_P2_Receivable_Name}</th>
+                            <th class="col2" style="font-weight: bold;">{!$Label.FE_P2_Purchase_Date}</th>
+                            <th class="col6" style="font-weight: bold;">{!$Label.FE_P2_Gross_Receivable_Amount}</th>
+                            <th class="col4" style="font-weight: bold;">{!$Label.FE_P2_Initial_Purchase_Factor}</th>
+                            <th class="col13" style="font-weight: bold;">{!$Label.FE_P2_Discount_Percent}</th>
+                            <th class="col5" style="font-weight: bold;">{!$Label.FE_P2_Initial_Purchase_Amount}</th>
+                            <th class="col10" style="font-weight: bold;">{!$Label.FE_P2_Discount}</th>
+                            <th class="col9" style="font-weight: bold;">{!$Label.FE_P2_Upfront_Purchase_Price}</th>
+                            <th class="col7" style="font-weight: bold;">{!$Label.FE_P2_Expected_Payout_Date}</th>
+                            <th class="col8" style="font-weight: bold;">{!$Label.FE_P2_Days_Outstanding}</th>
+                            <th class="col3" style="font-weight: bold;">{!$Label.FE_P2_Maturity_Buffer}</th>
+                            <th class="col12" style="font-weight: bold;">{!$Label.FE_P2_Effective_Rate}</th>
+                            <th class="col11" style="display:none;">Deduction</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <apex:repeat value="{!oppWrapper.listFERForOppSchool}" var="fer">
+                        <tr id="{!oppWrapper.oppSchoolName}">
+                            <td style="line-height: 30px !important"><apex:outputText value="{!fer.Name}"/>
+                            </td>
+                            <td><apex:inputText styleclass="date-picker rounded changeFlag" value="{!fer.Purchase_Date__c}"
+                                onChange="populateFormattedDate(this);calculateDaysOutStanding(this); "/>
+                                <div class="formattedDate" style="display:none;">
+                                    <Apex:inputField value="{!fer.Purchase_Date__c}" onKeyPress="disableEnter(this, event);"/>
+                                </div>
+                            </td>
+                            <td><apex:outputText value="{0, number, $###,###}" styleClass="grv">
+                                <apex:param value="{!fer.GRV_Amount__c}"></apex:param></apex:outputText>
+                            </td>
+                            <td class="col4"><apex:inputText styleClass="rounded IPF" value="{!fer.Initial_Purchase_Factor__c}"
+                                        onChange="calculateIPFV(this);" onKeyPress="disableEnter(this, event);"/> %</td>
+                            <td class="discRate"><apex:inputText styleClass="rounded discountRatePercent" html-data-id="{!oppWrapper.oppSchoolName}" value="{!fer.Discount_Rate__c}"
+                                        onChange="calculateDiscountRow(this);" onKeyPress="disableEnter(this, event);"/> %</td>
+                            <td class="IPFV"><apex:outputText value="{0,number,$###,###,###}">
+                                            <Apex:param value="{!fer.FV_Amount__c}" /></apex:outputText>
+                            </td>
+                            <td class="discount"><apex:outputText value="{0,number,$###,###,###}">
+                                            <Apex:param value="{!fer.Discount_Amount__c}"   /></apex:outputText>
+                            </td>
+                            <td class="UPP"><apex:outputText value="{0,number,$###,###,###}">
+                                            <Apex:param value="{!fer.Upfront_Purchase_Price__c}"    /></apex:outputText>
+                            </td>
+                            <td class="expectedPayDate" style="text-align:center"> <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                    <apex:param value="{!fer.Expected_Pay_Date__c}"/>
+                                </apex:outputText>
+                            </td>
+                            <td class="daysOutstanding" style="text-align:center">{!fer.Days_Outstanding__c} <span style="display:{!IF(fer.Days_Outstanding__c != NULL, '','none')}">days</span></td>
+                            <td class="col3"><apex:inputText styleClass="rounded changeFlag maturityBuffer" value="{!fer.Maturity_Buffer__c}" onChange="calculateDiscountOnChange(this);"
+                                                                onKeyPress="disableEnter(this, event);"/> days</td>
+                            <td class="effectiveRate" style="font-weight: bold; text-align:center"><apex:outputText value="{0,number,##.##}">
+                                            <Apex:param value="{!fer.Effective_Rate__c}"    /></apex:outputText>%
+                            </td>
+                            <td class="deductions" ><apex:outputText value="{0,number,$###,###,###}" style="display:none;">
+                                                <Apex:param value="{!fer.FV_Deductions__c}"    />
+                                            </apex:outputText> </td>
+                        </tr>
+                        </apex:repeat>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td style="font-weight: bold;"> TOTAL: </td>
+                            <td></td>
+                            <td style="font-weight: bold;">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!oppWrapper.grvAmount}"/>
+                                </apex:outputText>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td class="IPFVTotal" style="font-weight: bold;">$000,000,000</td>
+                            <td class="DiscountTotal" style="font-weight: bold;">$000,000,000</td>
+                            <td class="UPPTotal" style="font-weight: bold;">$000,000,000</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            </apex:repeat>
+        </div>
+        <div class="row top-margin">
+            <div class="col-xs-6 col-sm-6 col-md-3">
+                <span class="sum-container pull-right">{!$Label.FE_P2_Total_Gross_Receivable_Value}
+                    <apex:outputText value="{0, number, $###,###}">
+                        <apex:param value="{!totalGRV}"/>
+                    </apex:outputText>
+                </span>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-3">
+                <span class="sum-container pull-right">{!$Label.FE_P2_Total_Initial_Purchase_Amount} <span id="AllIPFVTotal">$000,000,000</span></span>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-3">
+                <span class="sum-container pull-right">{!$Label.FE_P2_Total_Discount} <span id="AllDiscountTotal">$000,000,000</span></span>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-3">
+                <span class="sum-container pull-right">{!$Label.FE_P2_Total_Upfront_Purchase_Price} <span id="AllUPPTotal">$000,000,000</span></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 pull-right">
+                <button id="step2-btn" class="btn btn-primary pull-right" onClick="nextOnStep2();return false;">{!$Label.FE_Button_Next}</button>
+                <button id="step2-prev-btn" class="btn btn-secondary pull-right right-margin"
+                            onClick="previousOnStep2();return false;">{!$Label.FE_Button_Previous}</button>
+                <button class="step2-save-btn btn btn-primary pull-right right-margin" onClick="saveOnStep2();return false;">{!$Label.FE_Button_Save}</button>
+            </div>
+        </div>
+    </div>
+    </apex:outputPanel>
+    <!--Page 3 Start-->
+    <apex:outputPanel id="panel3">
+        <div class="container tab" id="step3">
+        <div class="row">
+            <div class="col-xs-12 carot form-horizontal">
+                {!$Label.FE_P3_Instruction}
+            </div>
+
+            <div class="col-xs-12 col-sm-6 right-padding">
+                <div class="buffer-top visible-xs"></div>
+                <div class="widget-header">
+                    {!$Label.FE_P3_Optional_Funding_Estimate_Information}
+                </div>
+                <div class="widget buffer-top">
+                    <table class="table form-table">
+                        <!-- Moving Transaction_Fee here from page 2. Client Pricing project-->
+                        <!-- <tr>
+                            <td class="col1">{!$Label.FE_P2_Transaction_Fee}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Transaction_Fee__c}" styleClass="rounded optionalFE"
+                                    onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr> -->
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Program_Fees_Collected}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Program_Fees_Collected__c}" styleClass="rounded optionalFE"
+                                    onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Transaction_Fee_Collected}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0,number,$ ###,###}" styleClass="rounded optionalFE">
+                                    <apex:param value="{!fundingEst.Transaction_Fee_Collected__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                        <tr>
+                            <!-- !important flag would not overwrite - needed inline style -->
+                            <!-- 05/14/2014 : Manisha : Commented to remove vertical alignment as per jeff's request -->
+                            <!-- <td class="col1" style="vertical-align: top;">{!$Label.FE_P3_Unpaid_Balance_Receivables_Collected}</td> -->
+                            <td class="col1">{!$Label.FE_P3_Unpaid_Balance_Receivables_Collected}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Unpaid_Balance_Receivables_Collected__c}"
+                                    styleClass="rounded upaidBalance optionalFE" onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr class="tr-long-description" style="display: {!IF(fundingEst.Unpaid_Balance_Receivables_Collected__c != null &&
+                                                    fundingEst.Unpaid_Balance_Receivables_Collected__c > 0, '','none')}">
+                            <td class="col1"> {!$Label.FE_P3_Desc_of_Unpaid_Balance} </td>
+                            <td class="col2"> <apex:inputField value="{!fundingEst.Description_of_Unpaid_Balance_Receivable__c}"
+                                styleClass="rounded long-description" style="display: {!IF(fundingEst.Unpaid_Balance_Receivables_Collected__c != null &&
+                                                    fundingEst.Unpaid_Balance_Receivables_Collected__c > 0, 'block','none')}"
+                                                    onKeyPress="disableEnter(this, event);" /></td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Application_Fee_Credit}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Application_Fee_Credit__c}" styleClass="rounded optionalFE"
+                                    onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Penalty_Interest}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Penalty_Interest__c}" styleClass="rounded optionalFE"
+                                    onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Blocked_Account_Fee_Collected}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Blocked_Account_Fee_Collected__c}" styleClass="rounded optionalFE"
+                                            onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Bond_or_Other_Payment}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Bond_or_Other_Payment__c}" styleClass="rounded optionalFE"
+                                            onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Refund_Reimbursements}</td>
+                            <td class="col2">
+                                $<apex:inputText value="{!fundingEst.Refund_Reimbursements__c}" styleClass="rounded optionalFE"
+                                        onKeyPress="disableEnter(this, event);"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <!--Page 3 Column 2-->
+            <div class="col-xs-12 col-sm-6 left-padding">
+                <!--<apex:repeat value="{!listFER_Step3}" var="oppWrapper">
+                <div class="sum-container lefty">
+                    {!oppWrapper.oppSchoolName}
+                    <span class="pull-right uppTab3">UPP <apex:outputText value="{0, number, $###,###}">
+                        <apex:param value="{!oppWrapper.amount}"/>
+                    </apex:outputText></span>
+                </div>
+                </apex:repeat>-->
+
+                <div class="widget-header header-highlight">
+                    {!$Label.FE_P3_RPA_Summary}
+                </div>
+                <div class="widget buffer">
+                    <table class="table">
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Amount}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.RPA_Face_Value_Estimate__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                        <!--
+                        As per the spec this has to be excluded
+                        <tr>
+                            <td class="col1">RPA Funded</td>
+                            <td class="col2">$000,000</td>
+                        </tr>
+                         -->
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Utilized}</td>
+                            <td class="col2"><apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.RPA_FV_Utilized__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Balance}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.RPA_FV_Remaining_Estimate__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Percent_Funded}</td>
+                            <td class="col2">{!opp.RPA__r.Percent_Funded__c}%</td>
+                        </tr>
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Total_Program_Fee}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.Program_Fee_Estimate__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Fee_Collected}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.RPA_Program_Fee_Collected__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Remaining_Fee_to_Collect}</td>
+                            <td class="col2">
+                                <apex:outputText value="{0, number, $###,###}">
+                                    <apex:param value="{!opp.RPA__r.Remaining_Fee_to_Collect_Estimate__c}"/>
+                                </apex:outputText>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_RPA_Percent_Collected} </td>
+                            <td class="col2">{!opp.RPA__r.Percent_Fee_Collected_Estimate__c}%</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="widget buffer">
+<!--                <div class="col-sm-8 col-md-6 pull-right sum-container">-->
+                    <table class="table">
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Total_Upfront_Purchase_Price}</td>
+                            <td class="col2">
+                                <span class="sumTotalUPP">
+                                <apex:outputText value="{0,number,$###,###.00}">
+                                    <apex:param value="{!fundingEst.Total_Upfront_Purchase_Price__c}"/>
+                                </apex:outputText>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Total}</td>
+                            <td class="col2" id="totalOptionalFE">$000,000</td>
+                        </tr>
+                        <tr>
+                            <td class="col1">{!$Label.FE_P3_Net_to_School}</td>
+                            <td class="col2"><span class="sum-total netToSchool"></span>
+                            <apex:inputHidden value="{!fundingEst.Net_to_School__c}" id="netToSchoolInput"/></td>
+                        </tr>
+                    </table>
+                </div>
+<!--                    {!$Label.FE_P3_Net_to_School} <span class="sum-total">$000,000</span>-->
+<!--                </div>-->
+            </div>
+            <div class="col-xs-12 buffer-top">
+            </div>
+        </div>
+        <div class="row buttons top-margin">
+            <div class="col-lg-12 pull-right hidden-xs hidden-sm">
+                <button class="step3-client-btn btn btn-primary pull-right" onClick="saveAndGoFERecord();return false;">{!$Label.FE_Button_Generate_Client_Estimate}</button>
+                <button class="step3-internal-btn btn btn-primary pull-right right-margin" onClick="saveAndGenerateInternalSummary();return false;">{!$Label.FE_Button_Generate_Internal_Summary}</button>
+                <button class="step3-save-btn btn btn-primary pull-right right-margin" onClick="saveOnStep3();return false;">{!$Label.FE_Button_Save}</button>
+                <button class="step3-prev-btn btn btn-secondary pull-right right-margin" onClick="PreviousOnStep3();return false;">{!$Label.FE_Button_Previous}</button>
+            </div>
+            <div class="col-xs-12 pull-right hidden-md hidden-lg">
+                <button class="step3-save-btn btn btn-primary pull-right right-margin" onClick="saveOnStep3();return false;">{!$Label.FE_Button_Save}</button>
+                <button class="step3-prev-btn btn btn-secondary pull-right right-margin" onClick="PreviousOnStep3();return false;">{!$Label.FE_Button_Previous}</button>
+            </div>
+            <div class="col-xs-12 pull-right visible-sm buffer-top">
+                <button class="step3-client-btn btn btn-primary pull-right" onClick="saveAndGoFERecord();return false;">{!$Label.FE_Button_Generate_Client_Estimate}</button>
+                <button class="step3-internal-btn btn btn-primary pull-right right-margin" onClick="saveAndGenerateInternalSummary();return false;">{!$Label.FE_Button_Generate_Internal_Summary}</button>
+            </div>
+            <div class="col-xs-12 pull-right visible-xs buffer-top">
+                <button class="step3-client-btn btn btn-primary pull-right" onClick="saveAndGoFERecord();return false;">{!$Label.FE_Button_Generate_Client_Estimate}</button>
+            </div>
+            <div class="col-xs-12 pull-right visible-xs buffer-top">
+                <button class="step3-internal-btn btn btn-primary pull-right right-margin" onClick="saveAndGenerateInternalSummary();return false;">{!$Label.FE_Button_Generate_Internal_Summary}</button>
+            </div>
+        </div>
+    </div>
+    </apex:outputPanel>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <apex:includeScript value="{!$Resource.FundingEstimateCalculator}/js/jquery-1.10.2.min.js" />
+    <apex:includeScript value="{!$Resource.FundingEstimateCalculator}/js/jquery.formatCurrency-1.4.0.min.js" />
+    <apex:includeScript value="{!$Resource.FundingEstimateCalculator}/js/bootstrap.min.js" />
+    <apex:includeScript value="{!$Resource.FundingEstimateCalculator}/js/jquery-ui-1.10.4.custom.min.js" />
+    <!-- <apex:includeScript value="{!$Resource.FundingEstimateCalculator}/js/main.js" /> -->
+
+    <script>
+        $(document).ready(function() {
+            $(".changeFlag").change(function() {
+                $(this).addClass('changed');
+            });
+
+            $(".checkbox").click(function() {
+                $(this).toggleClass('checked');
+                $(this).closest('tr').find('td').toggleClass('highlightRow');
+            });
+
+            $("#schoolSelection td .checkbox").click(function() {
+                var grv = $(this).closest('tr').find('.grv').asNumber();
+                var $grvTotal = $(this).closest('table').find('.grvtotal');
+                var grvTotal = $grvTotal.asNumber();
+                grvTotal = ($(this).hasClass('checked') ? grvTotal + grv : grvTotal - grv);
+                $grvTotal.html(grvTotal).formatCurrency({ roundToDecimalPlace: 0 });
+                var $includeInEstimate = $(this).closest('tr').find('.includedInEstimate');
+                $includeInEstimate.prop("checked", ($(this).hasClass('checked') ? true : false));
+            });
+
+            $(".table-responsive th .checkbox").click(function() {
+                var $parentTable = $(this).closest('table')
+                var $checkboxes = $parentTable.find('.checkbox');
+                var $rows = $parentTable.find('tbody td');
+                var $grvs = $parentTable.find('.grv');
+                var $grvTotal = $(this).closest('table').find('.grvtotal');
+
+                var $includeInEstimates = $(this).closest('table').find('.includedInEstimate');
+                if ($(this).hasClass('checked')) {
+                    $checkboxes.addClass('checked');
+                    $rows.addClass('highlightRow');
+                    $includeInEstimates.prop("checked", true);
+                    var grvTotal = 0;
+                    $grvs.each(function() {
+                        grvTotal = grvTotal + $(this).asNumber();
+                    });
+                    $grvTotal.html(grvTotal).formatCurrency({ roundToDecimalPlace: 0 });
+                }
+                else {
+                    $checkboxes.removeClass('checked');
+                    $rows.removeClass('highlightRow');
+                    $grvTotal.html("$000,000");
+                    $includeInEstimates.prop("checked", false);
+                }
+            });
+
+            checkOnLoad();
+            initDatePicker();
+
+            $(".closeModal").click(function() {
+                if ($(this).attr('data-target')) {
+                    $($(this).attr('data-target')).modal('hide');
+                }
+            });
+
+
+            // NAVIGATION
+
+            $("#step1-btn").click(function() {
+                if ($(this).hasClass('btn-primary')){
+                    validateNextOnStep1();
+                    return false;
+                }
+            });
+            $("#step2-btn").click(function() {
+                nextOnStep2();
+                return false;
+            });
+            $("#step2-prev-btn").click(function() {
+                window.location.href='index.html';
+            });
+            $(".step3-prev-btn").click(function() {
+                window.location.href='step2.html';
+            });
+            $(".step3-internal-btn").click(function() {
+                window.location.href='internalSummary.html';
+            });
+            navigate("step1","tab1");
+        });
+
+        //2017.02.09 J Caughie - Charter Terms expiry
+        function charterTerms() { 
+            [].forEach.call(document.querySelectorAll('.CharterTerms'), function (el) {
+              let charterTerminationString = el.innerHTML.match(/\d+\/\d+\/\d+/);
+              console.log(charterTerminationString);
+              if(charterTerminationString != null){
+                var charterTerminationDate = Date.parse(charterTerminationString[0]);
+              }
+              //let charterTerminationDate = Date.parse(charterTerminationString[0]);
+              console.log(charterTerminationDate);
+              let sixMonthsOut = new Date();
+              sixMonthsOut.setMonth(sixMonthsOut.getMonth() + 6);
+              if(charterTerminationDate == null || charterTerminationDate > sixMonthsOut){            //only show if the Terms expire before 6 months from now
+                el.style.visibility = 'hidden';
+              }
+            }); 
+        }
+        //2017.02.09 J Caughie - Charter Terms expiry
+
+        var validateNextOnStep1 = function(){
+            var isValid = false;
+            $(".includedInEstimate").each(function(){
+                if(isValid != true){
+                    isValid = $(this).prop("checked");
+                }
+            });
+            if(isValid == false){
+                alert('At least one receivable must be selected to generate a funding estimate.');
+            }else{
+                nextOnStep1();
+            }
+        }
+
+        var checkOnLoad = function(){
+            var checkAll = true;
+            var $grvTotal = $('.grvtotal');
+            var grvTotal = $grvTotal.asNumber();
+            $(".includedInEstimate").each(function(){
+                var grv = $(this).closest('tr').find('.grv').asNumber();
+                var $checkBox = $(this).closest("tr").find(".checkbox");
+                if($(this).prop("checked") == true){
+                    $checkBox.addClass('checked');
+                    $(this).closest('tr').find('td').toggleClass('highlightRow');
+                    grvTotal = grvTotal + grv;
+                }else{
+                    checkAll = false;
+                }
+            });
+            if(checkAll == true){
+                $(".table-responsive th .checkbox").addClass("checked");
+            }
+            $grvTotal.html(grvTotal).formatCurrency({ roundToDecimalPlace: 0 });
+
+        }
+        var initDatePicker = function(){
+            $(".date-picker").datepicker();
+        }
+
+        function navigate(stepId, tabId){
+            $(".tab").each(function(){
+                if($(this).attr("Id") == stepId){
+                    $(this).css("display", "");
+                }else{
+                    $(this).css("display", "none");
+                }
+
+            });
+
+            $(".col-sm-4").each(function(){
+                if($(this).attr("Id") == tabId){
+                    $(this).addClass("active");
+                }else{
+                    $(this).removeClass("active");
+                }
+            });
+
+            initDatePicker();
+            formatDateValues();
+        }
+
+        var formatDateValues = function(){
+
+            $(".formattedDate").each(function(){
+                $(this).closest("td").find(".date-picker").val($(this).find("input").val());
+
+            });
+        }
+
+
+        var onLoadStep2 = function(){
+            calculateTotalDiscount();
+            calculateTotalIPFV();
+            calculateTotalUPP();
+            charterTerms();                                             //2017.02.09 J Caughie
+        }
+
+        var calculateIPFV = function(ipf){
+            var ipfVal = $(ipf).val();
+            var $tr = $(ipf).closest("tr");
+            var grv = $tr.find(".grv").asNumber();
+            var $IPFV = $tr.find(".IPFV");
+            var deds = $tr.find(".deductions").asNumber();
+            console.log(deds);
+            var IPFV = Math.floor((ipfVal * grv - deds*100 )/100/100)*100;
+            $IPFV.html(IPFV).formatCurrency({ roundToDecimalPlace: 0 });
+            calculateTotalIPFV();
+            calculateDiscount($tr);
+
+        }
+
+
+        var calculateTotalIPFV = function(){
+            var totalAllIPFV = 0;
+            var totalIPFV;
+            var $totalIPFV;
+            var $AllIPFVTotal = $("#AllIPFVTotal");
+            $(".tableTab2").each(function(){
+                totalIPFV = 0
+                $totalIPFV = $(this).find(".IPFVTotal");
+                $(this).find(".IPFV").each(function(){
+                    IPFV = $(this).asNumber();
+                    totalIPFV = totalIPFV + IPFV;
+                });
+                totalAllIPFV = totalAllIPFV + totalIPFV;
+                $totalIPFV.html(totalIPFV).formatCurrency({ roundToDecimalPlace: 0 });
+            });
+            $AllIPFVTotal.html(totalAllIPFV).formatCurrency({ roundToDecimalPlace: 0 });
+        }
+
+
+        var calculateDiscountOnChange = function(chanedField){
+             var $tr = $(chanedField).closest("tr");
+            calculateDiscount($tr);
+        }
+
+        var calculateUPP = function($tr){
+            var $UPP = $tr.find(".UPP");
+            var IPFV = $tr.find(".IPFV").asNumber();
+            var discount = $tr.find(".discount").asNumber();
+            $UPP.html(IPFV - discount).formatCurrency({ roundToDecimalPlace: 0 });
+            calculateTotalUPP();
+            return (IPFV - discount).toFixed(2);
+        }
+
+        var calculateTotalUPP = function(){
+            var totalAllUPP = 0;
+            var totalUPP;
+            var $totalUPP;
+            var $AllUPPTotal = $("#AllUPPTotal");
+            $(".tableTab2").each(function(){
+                totalUPP = 0
+                $totalUPP = $(this).find(".UPPTotal");
+                $(this).find(".UPP").each(function(){
+
+                    UPP = $(this).asNumber();
+                    totalUPP = totalUPP + UPP;
+                });
+                totalAllUPP = totalAllUPP + totalUPP;
+                $totalUPP.html(totalUPP).formatCurrency({ roundToDecimalPlace: 0 });
+            });
+            $AllUPPTotal.html(totalAllUPP).formatCurrency({ roundToDecimalPlace: 0 });
+        }
+
+       var calculateDaysOutStanding = function(purchaseDate){
+
+            var puchaseDateVal = new Date($(purchaseDate).val());
+            var expectedPayDate = new Date($(purchaseDate).closest("tr").find(".expectedPayDate").html());
+            $daysOutStanding = $(purchaseDate).closest("tr").find(".daysOutstanding");
+            if(!isNaN(expectedPayDate.getTime())){
+                var timeDiff = Math.abs(expectedPayDate.getTime() - puchaseDateVal.getTime());
+                var diffDays = Math.floor(timeDiff / (1000 * 3600 * 24));
+                $daysOutStanding.html(diffDays + ' days');
+                calculateDiscount($(purchaseDate).closest("tr"));
+            }
+        }
+
+        var calculateDiscount = function($tr){
+            var discountRate = $tr.find(".discountRatePercent").asNumber() || $("input[id$='txtDiscountRate']").asNumber();
+            var daysOutstanding = $tr.find(".daysOutstanding").asNumber();
+            var maturityBuffer = $tr.find(".maturityBuffer").asNumber();
+            var IPFV = $tr.find(".IPFV").asNumber();
+            var $discount = $tr.find(".discount");
+            var $effectiveRate = $tr.find(".effectiveRate");
+            var UPP = $tr.find(".UPP").asNumber();
+
+            var discount = -((1 / (1 + ((discountRate/100) * ((daysOutstanding + maturityBuffer)/360)))) -1) * IPFV;
+            $discount.html(discount).formatCurrency({ roundToDecimalPlace: 0 });
+
+            calculateTotalDiscount();
+            UPP = calculateUPP($tr);
+
+            var effectiveRate = (((1 - (UPP/IPFV))/daysOutstanding) * 360 * 100).toFixed(2);
+            //console.log('@@@ effectiveRate final = ' + effectiveRate);
+            $effectiveRate.html(effectiveRate + '%');
+        }
+
+        var calculateDiscountRow = function(disc){
+            var $tr = $(disc).closest("tr");
+            calculateDiscount($tr);
+        }
+
+        var calculateTotalDiscount = function(){
+            var totalAllDiscount = 0;
+            var totalDiscount;
+            var $totalDiscount;
+            var $AllDiscountTotal = $("#AllDiscountTotal");
+            $(".tableTab2").each(function(){
+                totalDiscount = 0
+                $totalDiscount = $(this).find(".DiscountTotal");
+                $(this).find(".discount").each(function(){
+
+                    discount = $(this).asNumber();
+                    totalDiscount = totalDiscount + discount;
+                });
+                totalAllDiscount = totalAllDiscount + totalDiscount;
+                $totalDiscount.html(totalDiscount).formatCurrency({ roundToDecimalPlace: 0 });
+            });
+            $AllDiscountTotal.html(totalAllDiscount).formatCurrency({ roundToDecimalPlace: 0 });
+        }
+
+        var onLoadStep3 = function(){
+            //$('.tr-long-description').hide();
+            $(".upaidBalance").change(function() {
+                if($(this).asNumber() != 0){
+                    $('.long-description').show();
+                    $('.tr-long-description').show();
+                }else{
+                    $('.long-description').val('');
+                    $('.long-description').hide();
+                    $('.tr-long-description').hide();
+                }
+
+
+            });
+            $(".optionalFE").change(function(){
+                calculateTotalOptionalFE();
+            });
+            calculateTotalOptionalFE();
+        }
+
+        var calculateTotalOptionalFE = function(){
+            var total = 0;
+            var $totalOptionalFE = $("#totalOptionalFE");
+            $(".optionalFE").each(function(){
+                total = total + $(this).asNumber();
+            });
+
+            $totalOptionalFE.html(total).formatCurrency({ roundToDecimalPlace: 2 });
+
+            var $sumTotalUPP = $('.sumTotalUPP');
+            var sumTotalUPP = $sumTotalUPP.asNumber();
+
+            $(".netToSchool").html(sumTotalUPP-total).formatCurrency({ roundToDecimalPlace: 2 });
+            $("input[id$='netToSchoolInput']").val(sumTotalUPP-total);
+        }
+
+        var populateFormattedDate = function(dateInput){
+            var dateVal = $(dateInput).val();
+            $(dateInput).closest("td").find(".formattedDate").find("input").val(dateVal);
+
+        }
+
+        var calculateDiscountOnRateChange = function(id){
+            console.log(' BUTTON PRESSED ' + id);
+            var schoolName = id.slice(0, -6);
+            console.log('@@@ after slice = ' + schoolName);
+
+            $(".tableTab2").find("tr").each(function(){
+                var tableID = $(this).closest('tr').attr('id');
+                if(tableID == schoolName) {
+                    var discountRate = $("input[data-id$='"+id+"']").asNumber();
+                    $(".discountRatePercent[data-id$='"+schoolName+"']").val(discountRate);
+                    calculateDiscount($(this));
+                }
+            });
+        }
+
+        var disableEnter = function(inputField, e){
+            if(e.keyCode == 13 || e.which == 13){
+                e.preventDefault();
+                inputField.blur();
+                return false;
+            }
+        }
+
+        let calculateDiscountFromEffective = function(id){
+            console.log(' BUTTON PRESSED ' + id);
+            $(".tableTab2").find("tr").each(function(){
+                var tableID = $(this).closest('tr').attr('id');
+                if(tableID == id) {
+                    let targetDisc = calculateRequiredDiscountRate($(this),id);
+                    $(this).closest("tr").find(".discountRatePercent[data-id$='"+id+"']").val((targetDisc * 100.0).toFixed(2));
+                    calculateDiscount($(this));
+                }
+            });
+        }
+
+        let calculateRequiredDiscountRate = function($tr,id){
+            let daysOutstanding = $tr.find(".daysOutstanding").asNumber();
+            let maturityBuffer = $tr.find(".maturityBuffer").asNumber();
+            //let effectiveRate = $("input[id$='txtEffectiveRate']").asNumber();
+            let effectiveRate = $("input[data-id='"+id+"']").asNumber();
+            //console.log('@@@ input field data = ' + $("input[data-id='"+id+"']").length);
+            let targetDisc = (effectiveRate * daysOutstanding / 100.0)/((daysOutstanding + maturityBuffer) * (1.0 - effectiveRate * daysOutstanding / 360.0 / 100.0));
+            return targetDisc;
+        }
+
+    </script>
+  </body>
+</html>
+</apex:form>
+</apex:page>
