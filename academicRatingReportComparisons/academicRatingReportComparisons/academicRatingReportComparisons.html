@@ -1,0 +1,66 @@
+<template>
+    <lightning-card variant="Narrow" title="AUM Academic Rating Comparisons" icon-name="standard:account">
+        <!-- <lightning-button label="Refresh" slot="actions"></lightning-button>
+        <lightning-button label="Download" slot="actions"></lightning-button> -->
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_8-of-12">
+                <!-- <p> &nbsp; </p> -->
+                <p class="slds-m-left_xx-large">
+                    This report displays currently owned, non-vacant Properties and Academic Ratings data for the selected Year and/or Owner.
+                </p>
+                <p class="slds-m-left_xx-large">
+                    This primary use is for the Asset Manager to evaluate tenant academic performance against how the State/District performs when evaluating risk on behalf of Owner.
+                </p>
+            </div>
+            <div class="slds-col slds-size_2-of-12">
+                <div class="slds-align_absolute-center">
+                    <!-- default FY is ONE YEAR BACK -->
+                    <lightning-combobox
+                       name="Year"
+                       value={searchKey}
+                       options={fyOptions}
+                       placeholder="Default FY" 
+                       onchange={handleYearOnChange}
+                    ></lightning-combobox>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <lightning-combobox
+                       name="Owner"
+                       value={searchOwner}
+                       options={ownerOptions}
+                       placeholder="All Owners"
+                       onchange={handleOwnerOnChange}
+                    ></lightning-combobox>
+                </div>
+            </div>
+            <div class="slds-col slds-size_2-of-12">
+                <div class="slds-float_right slds-m-top_medium slds-m-right_medium">
+                    <lightning-button label="Download" slot="actions" onclick={downloadCSVFile}></lightning-button>
+                </div>
+            </div>
+          </div>
+    </lightning-card>
+
+    <div>
+        <br />
+    </div>
+
+    <!-- sldsValidatorIgnoreNextLine -->
+    <lightning-datatable
+        key-field="id"
+        columns={columns}
+        data={data}
+        hide-checkbox-column
+        >
+      </lightning-datatable>
+    <!-- following section to prevent cut off at utility bar -->
+    <div>
+        &nbsp;
+    </div>
+    <div>
+        &nbsp;
+    </div>
+    <div>
+        &nbsp;
+    </div>
+
+</template>
