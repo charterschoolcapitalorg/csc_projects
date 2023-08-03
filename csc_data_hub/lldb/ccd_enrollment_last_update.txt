@@ -1,0 +1,4 @@
+CREATE TABLE [dbo].[ccd_enrollment_last_update] (
+    [CCD_ENROLLMENT_LAST_UPDATE] DATETIME NOT NULL
+);
+

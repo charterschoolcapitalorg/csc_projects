@@ -1,0 +1,4 @@
+CREATE TABLE [dbo].[reonomy_last_update] (
+    [REONOMY_LAST_UPDATE] DATETIME NOT NULL
+);
+

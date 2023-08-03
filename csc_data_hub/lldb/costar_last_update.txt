@@ -1,0 +1,4 @@
+CREATE TABLE [dbo].[costar_last_update] (
+    [COSTAR_LAST_UPDATE] DATETIME NOT NULL
+);
+

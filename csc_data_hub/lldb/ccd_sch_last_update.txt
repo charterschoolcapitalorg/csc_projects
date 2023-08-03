@@ -1,0 +1,4 @@
+CREATE TABLE [dbo].[ccd_sch_last_update] (
+    [CCD_LAST_UPDATE] DATETIME NOT NULL
+);
+

@@ -1,0 +1,22 @@
+CREATE TABLE [dbo].[ccd_enrollment] (
+    [LAST_UPDATE]     DATETIME       CONSTRAINT [DEFAULT_ccd_enrollment_LAST_UPDATE] DEFAULT (getdate()) NOT NULL,
+    [SCHOOL_YEAR]     NVARCHAR (50)  NULL,
+    [FIPST]           INT            NULL,
+    [STATENAME]       NVARCHAR (50)  NULL,
+    [ST]              NVARCHAR (50)  NULL,
+    [UNION]           NVARCHAR (50)  NULL,
+    [SCH_NAME]        NVARCHAR (250) NULL,
+    [STATE_AGENCY_NO] INT            NULL,
+    [ST_LEAID]        NVARCHAR (50)  NULL,
+    [LEAID]           INT            NULL,
+    [ST_SCHID]        NVARCHAR (50)  NULL,
+    [NCESSCH]         BIGINT         NULL,
+    [SCHID]           BIGINT         NULL,
+    [GRADE]           NVARCHAR (50)  NULL,
+    [RACE_ETHNICITY]  NVARCHAR (50)  NULL,
+    [SEX]             NVARCHAR (50)  NULL,
+    [STUDENT_COUNT]   INT            NULL,
+    [TOTAL_INDICATOR] NVARCHAR (250) NULL,
+    [DMS_FLAG]        NVARCHAR (50)  NULL
+);
+

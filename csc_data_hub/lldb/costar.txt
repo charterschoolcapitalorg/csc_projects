@@ -1,0 +1,9 @@
+CREATE TABLE [dbo].[costar] (
+    [LAST_UPDATE]              DATETIME        CONSTRAINT [DEFAULT_costar_LAST_UPDATE] DEFAULT (getdate()) NULL,
+    [CITY]                     NVARCHAR (50)   NULL,
+    [STATE]                    NVARCHAR (50)   NULL,
+    [Overall_Market_Cap_Rate]  DECIMAL (18, 2) NULL,
+    [Market_Sale_Price_per_SF] DECIMAL (18, 2) NULL,
+    [MSA]                      NVARCHAR (150)  NULL
+);
+
