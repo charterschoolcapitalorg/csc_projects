@@ -1,3 +1,6 @@
+Description:
+
+
 CREATE TABLE [dbo].[ccd_enrollment] (
     [LAST_UPDATE]     DATETIME       CONSTRAINT [DEFAULT_ccd_enrollment_LAST_UPDATE] DEFAULT (getdate()) NOT NULL,
     [SCHOOL_YEAR]     NVARCHAR (50)  NULL,
